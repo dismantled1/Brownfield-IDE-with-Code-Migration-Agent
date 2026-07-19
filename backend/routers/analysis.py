@@ -19,12 +19,13 @@ class ExplainRequest(BaseModel):
 @router.post("/analyze", summary="Trigger background analysis of the active project")
 async def analyze_project(project_root: str = Depends(get_project_root)):
     """
-    Kicks off or restarts the asynchronous project scan.
-    Returns immediately since parsing executes in the background.
+    Triggers and runs the project scan, awaiting completion.
+    This guarantees that the files are fully parsed before returning,
+    preventing background task cut-offs in serverless environments.
     """
     try:
-        analysis_manager.trigger_analysis(project_root)
-        return {"success": True, "message": "Analysis initiated."}
+        await analysis_manager.run_analysis(project_root)
+        return {"success": True, "message": "Analysis completed."}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 
