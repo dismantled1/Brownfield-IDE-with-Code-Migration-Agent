@@ -1,0 +1,639 @@
+/* ============================================================
+   Brownfield IDE — Phase 2 Project Analysis & Chat Panel
+   ============================================================ */
+
+/* -- Sidebar Scrollable Container -- */
+.sidebar-scrollable-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+/* -- Collapsible Sidebar Sections -- */
+.sidebar-section {
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-section.collapsed .sidebar-section-content {
+  display: none !important;
+}
+
+.sidebar-section-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface-2);
+  cursor: pointer;
+  user-select: none;
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.sidebar-section-header:hover {
+  background: var(--color-surface-3);
+  color: var(--color-text-primary);
+}
+
+.section-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 12px;
+  color: var(--color-text-muted);
+  transition: transform var(--transition-fast);
+}
+.section-arrow svg {
+  width: 9px;
+  height: 9px;
+}
+.sidebar-section:not(.collapsed) .section-arrow {
+  transform: rotate(90deg);
+}
+
+.sidebar-section-content {
+  background: var(--color-panel-alt);
+  padding: var(--space-3);
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  border-top: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+/* -- Project Overview details -- */
+#overview-panel-content, 
+#statistics-panel-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.overview-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.overview-lbl {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+}
+.overview-val {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+  background: rgba(255,255,255,0.04);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+/* -- Analysis Progress Indicator -- */
+.analysis-progress-wrapper {
+  background: rgba(124, 58, 237, 0.05);
+  border: 1px solid rgba(124, 58, 237, 0.15);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: var(--text-xs);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.progress-track {
+  height: 6px;
+  background: var(--color-surface-3);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-cyan));
+  width: 0%;
+  border-radius: var(--radius-full);
+  transition: width var(--transition-normal);
+}
+
+.progress-status-text {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 4px;
+}
+
+/* -- Languages breakdown -- */
+.lang-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.lang-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lang-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+}
+
+.lang-bar-track {
+  height: 4px;
+  background: var(--color-surface-3);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.lang-bar-fill {
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: var(--radius-full);
+}
+
+/* -- Statistics Grid -- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+}
+
+.stats-card {
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-border);
+  padding: var(--space-3) var(--space-2);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--transition-fast), border-color var(--transition-fast);
+}
+.stats-card:hover {
+  transform: translateY(-1px);
+  border-color: var(--color-border-light);
+}
+
+.stats-val {
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stats-lbl {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* -- Interactive AI Chat Console -- */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--color-panel-alt);
+}
+
+.chat-header {
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-surface-2);
+}
+
+.chat-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+}
+
+.chat-header-actions {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  scrollbar-width: thin;
+}
+
+.chat-bubble {
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  max-width: 85%;
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.chat-bubble.user {
+  background: var(--color-accent-dim);
+  color: var(--color-text-primary);
+  align-self: flex-end;
+  border-bottom-right-radius: 2px;
+  border: 1px solid rgba(124, 58, 237, 0.2);
+}
+
+.chat-bubble.bot {
+  background: var(--color-surface-2);
+  color: var(--color-text-primary);
+  align-self: flex-start;
+  border-bottom-left-radius: 2px;
+  border: 1px solid var(--color-border);
+  width: 100%;
+  max-width: 95%;
+}
+
+/* Markdown formatting inside bot chat bubbles */
+.chat-bubble.bot h1, 
+.chat-bubble.bot h2, 
+.chat-bubble.bot h3 {
+  margin-top: var(--space-3);
+  margin-bottom: var(--space-2);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+.chat-bubble.bot h1 { font-size: var(--text-md); border-bottom: 1px solid var(--color-border); padding-bottom: 2px; }
+.chat-bubble.bot h2 { font-size: var(--text-base); }
+.chat-bubble.bot h3 { font-size: var(--text-sm); }
+
+.chat-bubble.bot ul, 
+.chat-bubble.bot ol {
+  margin-left: var(--space-4);
+  margin-bottom: var(--space-3);
+}
+.chat-bubble.bot li {
+  margin-bottom: var(--space-1);
+}
+
+.chat-bubble.bot code {
+  font-family: var(--font-code);
+  font-size: 11px;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 2px 5px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-accent);
+}
+
+.chat-bubble.bot pre {
+  background: #08080d;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  overflow-x: auto;
+  margin: var(--space-3) 0;
+  scrollbar-width: thin;
+}
+
+.chat-bubble.bot pre code {
+  background: none;
+  padding: 0;
+  color: var(--color-text-primary);
+  border-radius: 0;
+}
+
+.chat-bubble.bot a {
+  color: var(--color-text-cyan);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--color-cyan);
+}
+.chat-bubble.bot a:hover {
+  color: var(--color-cyan-hover);
+  border-bottom-style: solid;
+}
+
+/* Loading animations */
+.chat-bubble.loading-bubble {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: var(--space-2) var(--space-3);
+}
+
+.dot-pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-text-muted);
+  animation: pulse 1.4s infinite ease-in-out both;
+}
+.dot-pulse:nth-child(2) { animation-delay: 0.2s; }
+.dot-pulse:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes pulse {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
+}
+
+/* Chat Input Bar */
+.chat-input-wrapper {
+  padding: var(--space-3);
+  background: var(--color-surface-2);
+  border-top: 1px solid var(--color-border);
+}
+
+.chat-text-area-box {
+  display: flex;
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 5px var(--space-2);
+  align-items: flex-end;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.chat-text-area-box:focus-within {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(124,58,237,0.15);
+}
+
+.chat-textarea {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  color: var(--color-text-primary);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  padding: 4px;
+  max-height: 100px;
+  scrollbar-width: thin;
+}
+
+.chat-send-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+.chat-send-btn:hover:not(:disabled) {
+  color: var(--color-text-primary);
+  background-color: rgba(255,255,255,0.05);
+}
+.chat-send-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.chat-send-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ============================================================
+   Brownfield IDE — Phase 3 Search Results UI
+   ============================================================ */
+
+#search-panel-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.search-stats-summary {
+  background: rgba(6, 182, 212, 0.06);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  font-weight: var(--font-weight-medium);
+  font-size: 11px;
+  color: var(--color-text-cyan);
+}
+
+.search-results-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-height: 380px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.search-result-card {
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-border);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.search-result-card:hover {
+  border-color: var(--color-cyan);
+  transform: translateY(-1px);
+}
+
+.search-result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.search-result-title {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.search-result-badge {
+  font-size: 8px;
+  text-transform: uppercase;
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+}
+
+.search-result-badge.file { background: rgba(59, 130, 246, 0.15); color: var(--color-info); }
+.search-result-badge.class { background: rgba(16, 185, 129, 0.15); color: var(--color-success); }
+.search-result-badge.function { background: rgba(139, 92, 246, 0.15); color: var(--color-text-accent); }
+.search-result-badge.api { background: rgba(6, 182, 212, 0.15); color: var(--color-text-cyan); }
+
+.search-result-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
+
+.search-result-reason {
+  font-size: 10px;
+  color: var(--color-text-secondary);
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+/* -- Monaco line highlight styles -- */
+.line-highlight-flash {
+  background: rgba(124, 58, 237, 0.3) !important;
+  animation: line-flash-animation 1.5s ease-out;
+}
+
+.line-highlight-margin {
+  background: var(--color-accent) !important;
+  width: 5px !important;
+}
+
+@keyframes line-flash-animation {
+  0% { background: rgba(124, 58, 237, 0.4); }
+  60% { background: rgba(124, 58, 237, 0.15); }
+  100% { background: transparent; }
+}
+
+/* ============================================================
+   Brownfield IDE — Phase 4 Impact Analysis UI
+   ============================================================ */
+
+#impact-panel-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.risk-badge {
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-transform: uppercase;
+}
+.risk-badge.low { background: rgba(16, 185, 129, 0.15); color: var(--color-success); border: 1px solid rgba(16, 185, 129, 0.25); }
+.risk-badge.medium { background: rgba(245, 158, 11, 0.15); color: var(--color-warning); border: 1px solid rgba(245, 158, 11, 0.25); }
+.risk-badge.high { background: rgba(239, 68, 68, 0.15); color: var(--color-error); border: 1px solid rgba(239, 68, 68, 0.25); }
+
+.impact-summary-card {
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.impact-group-header {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-top: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 2px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.impact-group-count {
+  font-size: 9px;
+  background: rgba(255,255,255,0.06);
+  padding: 1px 4px;
+  border-radius: 2px;
+  color: var(--color-text-muted);
+}
+
+.impact-item-list {
+  max-height: 150px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: var(--space-2);
+}
+
+.impact-item-link {
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  text-decoration: none;
+}
+.impact-item-link:hover {
+  background: var(--color-surface-2);
+  color: var(--color-text-primary);
+}
+
+.graph-controls-overlay {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  display: flex;
+  gap: var(--space-2);
+  z-index: 10;
+  background: rgba(18, 18, 30, 0.85);
+  padding: var(--space-1);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  backdrop-filter: blur(4px);
+}
+
+.graph-controls-overlay button {
+  height: 24px;
+  min-width: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+

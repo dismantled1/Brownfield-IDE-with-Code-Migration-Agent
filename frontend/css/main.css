@@ -1,0 +1,508 @@
+/* ============================================================
+   Brownfield IDE — Global Layout & Reset
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;1,400&display=swap');
+
+/* -- Reset -- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; width: 100%; overflow: hidden; }
+
+body {
+  font-family:      var(--font-ui);
+  font-size:        var(--text-base);
+  color:            var(--color-text-primary);
+  background:       var(--color-bg);
+  line-height:      var(--line-height-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* -- Scrollbars -- */
+::-webkit-scrollbar               { width: var(--scrollbar-width); height: var(--scrollbar-width); }
+::-webkit-scrollbar-track         { background: var(--scrollbar-track); }
+::-webkit-scrollbar-thumb         { background: var(--scrollbar-thumb); border-radius: var(--radius-full); }
+::-webkit-scrollbar-thumb:hover   { background: var(--scrollbar-hover); }
+::-webkit-scrollbar-corner        { background: var(--scrollbar-track); }
+
+/* -- Selection -- */
+::selection { background: rgba(124, 58, 237, 0.35); color: var(--color-text-primary); }
+
+/* -- Focus -- */
+:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+button:focus:not(:focus-visible) { outline: none; }
+
+/* ============================================================
+   IDE Layout Shell
+   ============================================================ */
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.hidden { display: none !important; }
+
+/* -- IDE Header -- */
+.ide-header {
+  height:         var(--header-height);
+  min-height:     var(--header-height);
+  background:     var(--color-surface-1);
+  border-bottom:  1px solid var(--color-border);
+  display:        flex;
+  align-items:    center;
+  padding:        0 var(--space-4);
+  gap:            var(--space-3);
+  z-index:        var(--z-header);
+  flex-shrink:    0;
+  user-select:    none;
+}
+
+.ide-logo {
+  display:     flex;
+  align-items: center;
+  gap:         var(--space-2);
+  margin-right: var(--space-2);
+}
+
+.ide-logo svg { width: 22px; height: 22px; flex-shrink: 0; }
+
+.ide-logo-text {
+  font-size:   var(--text-base);
+  font-weight: var(--font-weight-bold);
+  background:  linear-gradient(135deg, var(--color-accent) 0%, var(--color-cyan) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.01em;
+}
+
+.ide-header-divider {
+  width:      1px;
+  height:     24px;
+  background: var(--color-border);
+  flex-shrink: 0;
+}
+
+.ide-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.ide-header-right {
+  margin-left: auto;
+  display:     flex;
+  align-items: center;
+  gap:         var(--space-2);
+}
+
+/* -- IDE Body -- */
+.ide-body {
+  display:    flex;
+  flex:       1;
+  overflow:   hidden;
+  min-height: 0;
+}
+
+/* -- IDE Status Bar -- */
+.ide-statusbar {
+  height:      var(--statusbar-height);
+  min-height:  var(--statusbar-height);
+  background:  var(--color-accent);
+  display:     flex;
+  align-items: center;
+  padding:     0 var(--space-3);
+  gap:         var(--space-4);
+  z-index:     var(--z-statusbar);
+  flex-shrink: 0;
+  user-select: none;
+  font-size:   var(--text-xs);
+  font-weight: var(--font-weight-medium);
+  color:       rgba(255,255,255,0.9);
+}
+
+.statusbar-item {
+  display:     flex;
+  align-items: center;
+  gap:         var(--space-1);
+  white-space: nowrap;
+  cursor:      default;
+}
+
+.statusbar-item svg { width: 12px; height: 12px; }
+
+.statusbar-right { margin-left: auto; display: flex; gap: var(--space-4); }
+
+/* -- Sidebar -- */
+.ide-sidebar {
+  width:        var(--sidebar-width);
+  min-width:    var(--sidebar-min);
+  max-width:    var(--sidebar-max);
+  background:   var(--color-panel);
+  border-right: 1px solid var(--color-border);
+  display:      flex;
+  flex-direction: column;
+  overflow:     hidden;
+  flex-shrink:  0;
+  z-index:      var(--z-explorer);
+}
+
+/* -- Center Panel (editor + terminal) -- */
+.ide-center {
+  flex:          1;
+  display:       flex;
+  flex-direction: column;
+  overflow:      hidden;
+  min-width:     0;
+}
+
+/* -- Chat Panel -- */
+.ide-chat {
+  width:        var(--chat-width);
+  min-width:    var(--chat-min);
+  max-width:    var(--chat-max);
+  background:   var(--color-panel);
+  border-left:  1px solid var(--color-border);
+  display:      flex;
+  flex-direction: column;
+  flex-shrink:  0;
+}
+
+/* -- Resize Handles -- */
+.resize-handle {
+  background:  transparent;
+  flex-shrink: 0;
+  position:    relative;
+  z-index:     50;
+  transition:  background var(--transition-fast);
+}
+
+.resize-handle::after {
+  content:  '';
+  position: absolute;
+  background: transparent;
+  transition: background var(--transition-fast);
+}
+
+.resize-handle-h {
+  width:  4px;
+  cursor: col-resize;
+}
+.resize-handle-h::after {
+  top: 0; bottom: 0; left: 1px; right: 1px;
+}
+
+.resize-handle-v {
+  height: 4px;
+  cursor: row-resize;
+}
+.resize-handle-v::after {
+  left: 0; right: 0; top: 1px; bottom: 1px;
+}
+
+.resize-handle:hover::after,
+.resize-handle.dragging::after {
+  background: var(--color-accent);
+}
+
+/* ============================================================
+   Buttons
+   ============================================================ */
+
+.btn {
+  display:      inline-flex;
+  align-items:  center;
+  justify-content: center;
+  gap:          var(--space-2);
+  border:       none;
+  border-radius: var(--radius-md);
+  cursor:       pointer;
+  font-family:  var(--font-ui);
+  font-size:    var(--text-sm);
+  font-weight:  var(--font-weight-medium);
+  padding:      var(--space-2) var(--space-3);
+  transition:   background var(--transition-fast), transform var(--transition-fast),
+                box-shadow var(--transition-fast);
+  white-space:  nowrap;
+  user-select:  none;
+  outline:      none;
+}
+
+.btn:active { transform: scale(0.97); }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-accent), var(--color-cyan-dim));
+  color: #fff;
+  box-shadow: var(--shadow-accent);
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--color-accent-hover), var(--color-cyan));
+  box-shadow: 0 0 24px rgba(124,58,237,0.5);
+}
+
+.btn-ghost {
+  background: transparent;
+  color:      var(--color-text-secondary);
+  border:     1px solid transparent;
+}
+.btn-ghost:hover {
+  background: rgba(255,255,255,0.05);
+  color:      var(--color-text-primary);
+  border-color: var(--color-border);
+}
+
+.btn-icon {
+  width:   32px;
+  height:  32px;
+  padding: 0;
+  border-radius: var(--radius-md);
+}
+
+.btn-icon svg { width: 16px; height: 16px; }
+
+.btn-danger {
+  background: rgba(239,68,68,0.15);
+  color:      var(--color-error);
+  border:     1px solid rgba(239,68,68,0.3);
+}
+.btn-danger:hover {
+  background: rgba(239,68,68,0.25);
+}
+
+/* ============================================================
+   Modals
+   ============================================================ */
+
+.modal-overlay {
+  position:   fixed;
+  inset:      0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  display:    flex;
+  align-items: center;
+  justify-content: center;
+  z-index:    var(--z-modal);
+  animation:  fadeIn var(--transition-fast);
+}
+
+.modal {
+  background:   var(--color-surface-2);
+  border:       1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow:   var(--shadow-xl);
+  padding:      var(--space-6);
+  min-width:    400px;
+  max-width:    600px;
+  width:        90%;
+  animation:    slideUp var(--transition-normal);
+}
+
+.modal-title {
+  font-size:   var(--text-lg);
+  font-weight: var(--font-weight-semibold);
+  color:       var(--color-text-primary);
+  margin-bottom: var(--space-4);
+  display:     flex;
+  align-items: center;
+  gap:         var(--space-2);
+}
+
+.modal-title svg {
+  color: var(--color-accent);
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.modal-actions {
+  display:  flex;
+  gap:      var(--space-3);
+  margin-top: var(--space-5);
+  justify-content: flex-end;
+}
+
+/* ============================================================
+   Form Elements
+   ============================================================ */
+
+.input {
+  width:        100%;
+  background:   var(--color-surface-1);
+  border:       1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color:        var(--color-text-primary);
+  font-family:  var(--font-ui);
+  font-size:    var(--text-base);
+  padding:      var(--space-2) var(--space-3);
+  transition:   border-color var(--transition-fast), box-shadow var(--transition-fast);
+  outline:      none;
+}
+.input:focus {
+  border-color: var(--color-accent);
+  box-shadow:   0 0 0 3px rgba(124,58,237,0.2);
+}
+.input::placeholder { color: var(--color-text-muted); }
+
+.input-label {
+  display:      block;
+  font-size:    var(--text-sm);
+  font-weight:  var(--font-weight-medium);
+  color:        var(--color-text-secondary);
+  margin-bottom: var(--space-2);
+}
+
+/* ============================================================
+   Context Menu
+   ============================================================ */
+
+#context-menu {
+  position:     fixed;
+  background:   var(--color-surface-2);
+  border:       1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow:   var(--shadow-lg);
+  min-width:    160px;
+  z-index:      var(--z-context);
+  padding:      var(--space-1) 0;
+  animation:    scaleIn 120ms ease;
+  transform-origin: top left;
+}
+
+.context-item {
+  display:      flex;
+  align-items:  center;
+  gap:          var(--space-3);
+  padding:      var(--space-2) var(--space-4);
+  font-size:    var(--text-sm);
+  color:        var(--color-text-primary);
+  cursor:       pointer;
+  transition:   background var(--transition-fast);
+  white-space:  nowrap;
+  user-select:  none;
+}
+.context-item svg { width: 14px; height: 14px; color: var(--color-text-muted); flex-shrink: 0; }
+.context-item:hover { background: rgba(124,58,237,0.15); color: var(--color-text-accent); }
+.context-item:hover svg { color: var(--color-text-accent); }
+
+.context-separator {
+  height: 1px;
+  background: var(--color-border);
+  margin: var(--space-1) 0;
+}
+
+.context-item.danger:hover { background: rgba(239,68,68,0.15); color: var(--color-error); }
+.context-item.danger:hover svg { color: var(--color-error); }
+
+/* ============================================================
+   Toast Notifications
+   ============================================================ */
+
+#toast-container {
+  position:  fixed;
+  bottom:    calc(var(--statusbar-height) + var(--space-4));
+  right:     var(--space-4);
+  z-index:   var(--z-toast);
+  display:   flex;
+  flex-direction: column;
+  gap:       var(--space-2);
+  pointer-events: none;
+}
+
+.toast {
+  background:   var(--color-surface-2);
+  border:       1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding:      var(--space-3) var(--space-4);
+  font-size:    var(--text-sm);
+  color:        var(--color-text-primary);
+  box-shadow:   var(--shadow-lg);
+  min-width:    240px;
+  max-width:    400px;
+  animation:    toastIn var(--transition-normal);
+  display:      flex;
+  align-items:  center;
+  gap:          var(--space-3);
+  pointer-events: all;
+  border-left:  3px solid var(--color-border);
+}
+
+.toast.success { border-left-color: var(--color-success); }
+.toast.error   { border-left-color: var(--color-error); }
+.toast.warning { border-left-color: var(--color-warning); }
+.toast.info    { border-left-color: var(--color-info); }
+
+.toast.fade-out { animation: toastOut var(--transition-normal) forwards; }
+
+.toast svg { width: 16px; height: 16px; flex-shrink: 0; }
+.toast.success svg { color: var(--color-success); }
+.toast.error   svg { color: var(--color-error); }
+.toast.warning svg { color: var(--color-warning); }
+.toast.info    svg { color: var(--color-info); }
+
+/* ============================================================
+   Loading Spinner
+   ============================================================ */
+
+.spinner {
+  width:  20px;
+  height: 20px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+.spinner-lg { width: 36px; height: 36px; border-width: 3px; }
+
+/* ============================================================
+   Panel Header (shared by sidebar / terminal / chat)
+   ============================================================ */
+
+.panel-header {
+  display:     flex;
+  align-items: center;
+  padding:     0 var(--space-3);
+  height:      36px;
+  min-height:  36px;
+  background:  var(--color-surface-1);
+  border-bottom: 1px solid var(--color-border);
+  font-size:   var(--text-xs);
+  font-weight: var(--font-weight-semibold);
+  color:       var(--color-text-secondary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  user-select: none;
+  gap:         var(--space-2);
+}
+
+.panel-header-actions {
+  margin-left: auto;
+  display:     flex;
+  gap:         var(--space-1);
+}
+
+.panel-header-actions .btn-icon {
+  width:  24px;
+  height: 24px;
+}
+.panel-header-actions .btn-icon svg { width: 13px; height: 13px; }
+
+/* ============================================================
+   Keyframe Animations
+   ============================================================ */
+
+@keyframes fadeIn    { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp   { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scaleIn   { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+@keyframes spin      { to   { transform: rotate(360deg); } }
+@keyframes pulse     { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+@keyframes shimmer   { to   { background-position: 200% center; } }
+@keyframes toastIn   { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+@keyframes toastOut  { to   { opacity: 0; transform: translateX(110%); } }
+@keyframes blink     { 0%,100% { opacity: 1; } 50% { opacity: 0; } }

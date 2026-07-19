@@ -1,0 +1,260 @@
+/* ============================================================
+   Brownfield IDE — Project Explorer Panel
+   ============================================================ */
+
+.explorer-wrapper {
+  display:        flex;
+  flex-direction: column;
+  height:         100%;
+  overflow:       hidden;
+}
+
+/* -- Search Bar -- */
+.explorer-search {
+  padding:    var(--space-2) var(--space-3);
+  background: var(--color-panel);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.explorer-search-wrap {
+  position:   relative;
+  display:    flex;
+  align-items: center;
+}
+
+.explorer-search-icon {
+  position: absolute;
+  left:     var(--space-2);
+  color:    var(--color-text-muted);
+  pointer-events: none;
+}
+.explorer-search-icon svg { width: 13px; height: 13px; }
+
+.explorer-search-input {
+  width:        100%;
+  background:   var(--color-surface-1);
+  border:       1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color:        var(--color-text-primary);
+  font-family:  var(--font-ui);
+  font-size:    var(--text-xs);
+  padding:      5px var(--space-2) 5px 26px;
+  outline:      none;
+  transition:   border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.explorer-search-input:focus {
+  border-color: var(--color-accent);
+  box-shadow:   0 0 0 2px rgba(124,58,237,0.2);
+}
+.explorer-search-input::placeholder { color: var(--color-text-disabled); }
+
+.explorer-search-clear {
+  position:   absolute;
+  right:      var(--space-2);
+  background: none;
+  border:     none;
+  color:      var(--color-text-muted);
+  cursor:     pointer;
+  padding:    2px;
+  border-radius: 2px;
+  display:    flex;
+}
+.explorer-search-clear:hover { color: var(--color-text-primary); }
+.explorer-search-clear svg { width: 12px; height: 12px; }
+
+/* -- Tree Container -- */
+.explorer-tree-container {
+  flex:      1;
+  overflow:  auto;
+  padding:   var(--space-1) 0;
+  position:  relative;
+}
+
+/* Search results overlay */
+.explorer-search-results {
+  position:  absolute;
+  inset:     0;
+  background: var(--color-panel);
+  overflow:  auto;
+  z-index:   5;
+  padding:   var(--space-2) 0;
+}
+
+.search-results-header {
+  font-size:  var(--text-xs);
+  color:      var(--color-text-muted);
+  padding:    var(--space-1) var(--space-4);
+  margin-bottom: var(--space-1);
+}
+
+/* -- Tree Nodes -- */
+.tree-node {
+  position:   relative;
+  user-select: none;
+}
+
+.tree-node-row {
+  display:      flex;
+  align-items:  center;
+  gap:          var(--space-1);
+  padding:      3px 0;
+  padding-right: var(--space-2);
+  cursor:       pointer;
+  border-radius: 0;
+  transition:   background var(--transition-fast);
+  position:     relative;
+  white-space:  nowrap;
+  overflow:     hidden;
+}
+
+.tree-node-row:hover   { background: rgba(255,255,255,0.04); }
+.tree-node-row.active  { background: rgba(124,58,237,0.2); }
+.tree-node-row.active .tree-node-name { color: var(--color-text-primary); }
+.tree-node-row.selected { background: rgba(124,58,237,0.15); }
+.tree-node-row.rename-mode { background: rgba(124,58,237,0.1); }
+
+.tree-node-row:hover .tree-node-actions { opacity: 1; }
+
+/* Arrow (folder toggle) */
+.tree-arrow {
+  width:        16px;
+  height:       16px;
+  display:      flex;
+  align-items:  center;
+  justify-content: center;
+  flex-shrink:  0;
+  color:        var(--color-text-muted);
+  transition:   transform var(--transition-fast), color var(--transition-fast);
+}
+.tree-arrow svg { width: 10px; height: 10px; }
+.tree-arrow.expanded { transform: rotate(90deg); }
+.tree-arrow.empty    { opacity: 0; pointer-events: none; }
+
+/* File / Folder icon */
+.tree-icon {
+  width:       16px;
+  height:      16px;
+  flex-shrink: 0;
+  display:     flex;
+  align-items: center;
+  justify-content: center;
+}
+.tree-icon svg,
+.tree-icon img { width: 16px; height: 16px; }
+
+/* Node name */
+.tree-node-name {
+  flex:        1;
+  font-size:   var(--text-sm);
+  color:       var(--color-text-secondary);
+  overflow:    hidden;
+  text-overflow: ellipsis;
+  line-height: 1;
+  min-width:   0;
+}
+
+.tree-node-row:hover .tree-node-name  { color: var(--color-text-primary); }
+.tree-node-row.active .tree-node-name { color: var(--color-text-primary); font-weight: var(--font-weight-medium); }
+.tree-node.folder > .tree-node-row .tree-node-name { color: var(--color-text-primary); }
+
+/* Inline rename input */
+.tree-rename-input {
+  flex:         1;
+  background:   var(--color-surface-1);
+  border:       1px solid var(--color-accent);
+  border-radius: 3px;
+  color:        var(--color-text-primary);
+  font-family:  var(--font-ui);
+  font-size:    var(--text-sm);
+  padding:      1px var(--space-1);
+  outline:      none;
+  min-width:    80px;
+}
+
+/* Hover actions */
+.tree-node-actions {
+  display:    flex;
+  gap:        2px;
+  opacity:    0;
+  flex-shrink: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.tree-node-action-btn {
+  width:        18px;
+  height:       18px;
+  display:      flex;
+  align-items:  center;
+  justify-content: center;
+  background:   transparent;
+  border:       none;
+  border-radius: 3px;
+  color:        var(--color-text-muted);
+  cursor:       pointer;
+  transition:   background var(--transition-fast), color var(--transition-fast);
+}
+.tree-node-action-btn:hover { background: rgba(255,255,255,0.1); color: var(--color-text-primary); }
+.tree-node-action-btn svg { width: 11px; height: 11px; }
+
+/* Children container */
+.tree-children {
+  overflow: hidden;
+  transition: height var(--transition-normal);
+}
+.tree-children.collapsed { height: 0 !important; }
+
+/* Loading skeleton */
+.tree-skeleton {
+  display:    flex;
+  align-items: center;
+  gap:        var(--space-2);
+  padding:    4px var(--space-3);
+}
+
+.tree-skeleton-line {
+  height:       10px;
+  border-radius: var(--radius-sm);
+  background:   linear-gradient(90deg,
+    var(--color-surface-2) 25%,
+    var(--color-surface-3) 50%,
+    var(--color-surface-2) 75%
+  );
+  background-size: 200% auto;
+  animation:  shimmer 1.5s linear infinite;
+}
+
+/* Drag highlight */
+.tree-node-row.drag-over { background: rgba(124,58,237,0.25); border-radius: var(--radius-sm); }
+
+/* Empty folder indicator */
+.tree-empty-folder {
+  padding:   var(--space-1) var(--space-3);
+  font-size: var(--text-xs);
+  color:     var(--color-text-disabled);
+  font-style: italic;
+}
+
+/* No project placeholder */
+.explorer-empty {
+  display:    flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height:     100%;
+  gap:        var(--space-3);
+  padding:    var(--space-6);
+  text-align: center;
+}
+
+.explorer-empty svg { color: var(--color-text-disabled); width: 40px; height: 40px; }
+
+.explorer-empty-text {
+  font-size: var(--text-sm);
+  color:     var(--color-text-muted);
+}
+
+.explorer-empty-sub {
+  font-size: var(--text-xs);
+  color:     var(--color-text-disabled);
+}

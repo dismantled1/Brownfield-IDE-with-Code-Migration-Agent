@@ -1,0 +1,43 @@
+# Virtual environment
+venv/
+.venv/
+env/
+
+# IDE / Agent directories
+.claude/
+.gemini/
+
+# Temporary helper script
+powershell.bat
+
+# Python build/cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Node/JS dependencies (just in case)
+node_modules/
+dist-ssr/
+*.local
+
+# OS files
+.DS_Store
+Thumbs.db

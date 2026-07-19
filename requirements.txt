@@ -1,0 +1,7 @@
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+python-multipart>=0.0.9
+aiofiles>=23.2.1
+pywinpty>=2.0.13
+# Phase 6 — test execution (handles both pytest- and unittest-style tests)
+pytest>=8.0.0

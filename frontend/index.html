@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Brownfield IDE — AI-powered development environment for existing software projects. Phase 1: IDE Foundation." />
+  <title>Brownfield IDE</title>
+
+  <!-- Design tokens -->
+  <link rel="stylesheet" href="css/variables.css" />
+  <!-- Global layout & components -->
+  <link rel="stylesheet" href="css/main.css" />
+  <!-- Screens & panels -->
+  <link rel="stylesheet" href="css/welcome.css" />
+  <link rel="stylesheet" href="css/explorer.css" />
+  <link rel="stylesheet" href="css/editor.css" />
+  <link rel="stylesheet" href="css/terminal.css" />
+  <link rel="stylesheet" href="css/chat.css" />
+  <link rel="stylesheet" href="css/analysis.css" />
+  <link rel="stylesheet" href="css/agent.css" />
+  <link rel="stylesheet" href="css/validation.css" />
+  <link rel="stylesheet" href="css/source.css" />
+  <link rel="stylesheet" href="css/migration.css" />
+
+  <!-- xterm.js -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" />
+
+  <style>
+    /* Prevent FOUC while Monaco loads */
+    #monaco-container { opacity: 0; transition: opacity 0.3s; }
+    #monaco-container.ready { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     WELCOME SCREEN
+============================================================ -->
+<div id="welcome-screen" class="welcome-screen">
+  <div class="welcome-content">
+
+    <!-- Hero -->
+    <div class="welcome-hero">
+      <div class="welcome-badge">
+        <span class="welcome-badge-dot"></span>
+        AI Brownfield Development Environment
+      </div>
+      <div class="welcome-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3m8 0h3a2 2 0 0 0 2-2v-3"/>
+          <path d="m8 8 4 4-4 4M12 16h4"/>
+        </svg>
+      </div>
+      <h1 class="welcome-title">Brownfield IDE</h1>
+      <p class="welcome-subtitle">
+        An AI-powered development environment for brownfield software projects.
+        Open a project to start working.
+      </p>
+    </div>
+
+    <!-- Open Actions -->
+    <div class="welcome-actions">
+      <div class="welcome-action-card" id="btn-open-folder" role="button" tabindex="0"
+           aria-label="Open a local project folder">
+        <div class="welcome-action-icon folder-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+        <div class="welcome-action-title">Open Folder</div>
+        <div class="welcome-action-desc">Open an existing project folder from your filesystem</div>
+      </div>
+
+      <div class="welcome-action-card" id="btn-open-zip" role="button" tabindex="0"
+           aria-label="Upload and extract a ZIP project">
+        <div class="welcome-action-icon zip-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <div class="welcome-action-title">Open ZIP</div>
+        <div class="welcome-action-desc">Upload a ZIP archive and extract it as a new project (max 1 GB)</div>
+      </div>
+    </div>
+
+    <!-- Recent Projects -->
+    <div class="welcome-recents">
+      <div class="welcome-recents-header">Recent Projects</div>
+      <div id="recent-projects-list">
+        <div class="welcome-no-recents">No recent projects</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     IDE LAYOUT
+============================================================ -->
+<div id="ide-layout" style="display:none; flex-direction:column; height:100vh; width:100vw; overflow:hidden;">
+
+  <!-- ── Header ── -->
+  <header class="ide-header" role="banner">
+    <!-- Logo -->
+    <div class="ide-logo">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3m8 0h3a2 2 0 0 0 2-2v-3"/>
+        <path d="m8 8 4 4-4 4M12 16h4"/>
+      </svg>
+      <span class="ide-logo-text">Brownfield IDE</span>
+    </div>
+
+    <div class="ide-header-divider"></div>
+
+    <!-- Open actions -->
+    <div class="ide-header-actions">
+      <button class="btn btn-ghost" id="btn-header-open-folder" title="Open Folder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+        </svg>
+        Open Folder
+      </button>
+      <button class="btn btn-ghost" id="btn-header-open-zip" title="Open ZIP">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        Open ZIP
+      </button>
+    </div>
+
+    <!-- Right actions -->
+    <div class="ide-header-right">
+      <button class="btn btn-ghost btn-icon" id="btn-new-terminal" title="New Terminal (Ctrl+`)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+          <polyline points="4 17 10 11 4 5"/>
+          <line x1="12" y1="19" x2="20" y2="19"/>
+        </svg>
+      </button>
+      <div class="ide-header-divider"></div>
+      <button class="btn btn-ghost" id="btn-header-close" title="Close Project" style="color:var(--color-text-muted); font-size:var(--text-xs);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" y1="9" x2="9" y2="15"/>
+          <line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+        Close Project
+      </button>
+    </div>
+  </header>
+
+  <!-- ── Body ── -->
+  <div class="ide-body">
+
+    <!-- ── Sidebar / Explorer ── -->
+    <aside class="ide-sidebar" id="sidebar-panel" aria-label="Project Explorer">
+      <!-- Explorer header -->
+      <div class="panel-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+        </svg>
+        <span id="explorer-title">EXPLORER</span>
+        <div class="panel-header-actions">
+          <button class="btn-icon btn-ghost" id="btn-explorer-new-file"   title="New File">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          </button>
+          <button class="btn-icon btn-ghost" id="btn-explorer-new-folder" title="New Folder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
+          </button>
+          <button class="btn-icon btn-ghost" id="btn-explorer-refresh"    title="Refresh Explorer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="sidebar-scrollable-container">
+        
+        <!-- SECTION 1: PROJECT OVERVIEW -->
+        <div class="sidebar-section collapsed" id="section-overview">
+          <div class="sidebar-section-header" id="header-overview">
+            <span class="section-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </span>
+            <span class="section-title">PROJECT OVERVIEW</span>
+          </div>
+          <div class="sidebar-section-content" id="overview-panel-content">
+            <div style="font-style:italic; color:var(--color-text-muted);">No project opened</div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: PROJECT STATISTICS -->
+        <div class="sidebar-section collapsed" id="section-statistics">
+          <div class="sidebar-section-header" id="header-statistics">
+            <span class="section-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </span>
+            <span class="section-title">PROJECT STATISTICS</span>
+          </div>
+          <div class="sidebar-section-content" id="statistics-panel-content">
+            <div style="font-style:italic; color:var(--color-text-muted);">No project opened</div>
+          </div>
+        </div>
+
+        <!-- SECTION 2.5: SEARCH RESULTS -->
+        <div class="sidebar-section collapsed" id="section-search-results">
+          <div class="sidebar-section-header" id="header-search-results">
+            <span class="section-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </span>
+            <span class="section-title">SEARCH RESULTS</span>
+          </div>
+          <div class="sidebar-section-content" id="search-panel-content">
+            <div style="font-style:italic; color:var(--color-text-muted);">No search run yet</div>
+          </div>
+        </div>
+
+        <!-- SECTION 2.7: IMPACT ANALYSIS -->
+        <div class="sidebar-section collapsed" id="section-impact">
+          <div class="sidebar-section-header" id="header-impact">
+            <span class="section-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </span>
+            <span class="section-title">IMPACT ANALYSIS</span>
+          </div>
+          <div class="sidebar-section-content" id="impact-panel-content">
+            <div style="font-style:italic; color:var(--color-text-muted);">No component analyzed yet</div>
+          </div>
+        </div>
+
+        <!-- SECTION 2.8: DEVELOPMENT PLAN (Phase 5) -->
+        <div class="sidebar-section collapsed" id="section-devplan">
+          <div class="sidebar-section-header" id="header-devplan">
+            <span class="section-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </span>
+            <span class="section-title">DEVELOPMENT PLAN</span>
+          </div>
+          <div class="sidebar-section-content" id="devplan-panel-content">
+            <div style="font-style:italic; color:var(--color-text-muted);">No development request yet</div>
+          </div>
+        </div>
+
+        <!-- SECTION 2.9: VALIDATION & APPROVAL (Phase 6) -->
+        <div class="sidebar-section collapsed" id="section-validation">
+          <div class="sidebar-section-header" id="header-validation">
+            <span class="section-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </span>
+            <span class="section-title">VALIDATION &amp; APPROVAL</span>
+          </div>
+          <div class="sidebar-section-content" id="validation-panel-content">
+            <div style="font-style:italic; color:var(--color-text-muted);">No changes to validate yet</div>
+          </div>
+        </div>
+
+        <!-- SECTION 2.10: SOURCE UPDATE (Phase 7) -->
+        <div class="sidebar-section collapsed" id="section-source">
+          <div class="sidebar-section-header" id="header-source">
+            <span class="section-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </span>
+            <span class="section-title">SOURCE UPDATE</span>
+          </div>
+          <div class="sidebar-section-content" id="source-panel-content">
+            <div style="font-style:italic; color:var(--color-text-muted);">No approved changes to apply</div>
+          </div>
+        </div>
+
+        <!-- SECTION 2.11: CHANGE HISTORY (Phase 7) -->
+        <div class="sidebar-section collapsed" id="section-history">
+          <div class="sidebar-section-header" id="header-history">
+            <span class="section-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </span>
+            <span class="section-title">CHANGE HISTORY</span>
+          </div>
+          <div class="sidebar-section-content" id="history-panel-content">
+            <div style="font-style:italic; color:var(--color-text-muted);">No changes applied yet</div>
+          </div>
+        </div>
+
+        <!-- SECTION 2.12: CODE MIGRATION (Phase 1 Code Migration Agent) -->
+        <div class="migration-sidebar-divider"></div>
+        <div class="sidebar-section collapsed" id="section-migration">
+          <div class="sidebar-section-header" id="header-migration">
+            <span class="section-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </span>
+            <span class="section-title" style="color: var(--color-cyan-hover); font-weight: var(--font-weight-semibold);">🚀 CODE MIGRATION</span>
+          </div>
+          <div class="sidebar-section-content" id="migration-sidebar-content" style="padding: 10px;">
+            <div style="color: var(--color-text-secondary); font-size: 11px; display: flex; flex-direction: column; gap: 8px;">
+              <span>Migrate individual files, modules, layers, or entire projects between different languages.</span>
+              <button class="btn btn-primary btn-sm" id="btn-sidebar-open-migration" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                Open Workspace
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="migration-sidebar-divider"></div>
+
+        <!-- SECTION 3: FILES -->
+        <div class="sidebar-section" id="section-files" style="flex: 1; display: flex; flex-direction: column; min-height: 200px;">
+          <div class="sidebar-section-header" id="header-files">
+            <span class="section-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </span>
+            <span class="section-title">FILES</span>
+          </div>
+          <div class="sidebar-section-content" style="padding: 0; flex: 1; display: flex; flex-direction: column; overflow: hidden;">
+            <!-- Search -->
+            <div class="explorer-search">
+              <div class="explorer-search-wrap">
+                <span class="explorer-search-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </span>
+                <input type="text" id="explorer-search-input" class="explorer-search-input"
+                       placeholder="Search files…" autocomplete="off" spellcheck="false" />
+                <button id="explorer-search-clear" class="explorer-search-clear" style="display:none">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- File tree -->
+            <div class="explorer-tree-container">
+              <div id="explorer-tree"></div>
+              <div id="explorer-search-results" class="explorer-search-results hidden"></div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /.sidebar-scrollable-container -->
+    </aside>
+
+    <!-- Sidebar resize handle -->
+    <div class="resize-handle resize-handle-h" id="sidebar-resize" role="separator" aria-label="Resize explorer"></div>
+
+    <!-- ── Center (editor + terminal) ── -->
+    <main class="ide-center" role="main">
+
+      <!-- Tab Bar -->
+      <div class="tab-bar" role="tablist" aria-label="Open files">
+        <div class="tab-bar-tabs" id="tab-bar-tabs"></div>
+        <div class="tab-bar-actions">
+          <button class="btn-icon btn-ghost" title="Close All Tabs" id="btn-close-all-tabs">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Editor area -->
+      <div class="editor-area" id="editor-area">
+        <!-- Monaco container -->
+        <div id="monaco-container"></div>
+
+        <!-- Editor welcome (no file open) -->
+        <div id="editor-welcome" class="editor-welcome">
+          <div class="editor-welcome-logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3m8 0h3a2 2 0 0 0 2-2v-3"/>
+              <path d="m8 8 4 4-4 4M12 16h4"/>
+            </svg>
+          </div>
+          <div class="editor-welcome-title">Open a file to start editing</div>
+          <div class="editor-welcome-shortcuts">
+            <div class="editor-shortcut">
+              <span class="editor-shortcut-key">Ctrl+S</span> Save file
+            </div>
+            <div class="editor-shortcut">
+              <span class="editor-shortcut-key">Ctrl+F</span> Find in file
+            </div>
+            <div class="editor-shortcut">
+              <span class="editor-shortcut-key">Ctrl+H</span> Find &amp; Replace
+            </div>
+            <div class="editor-shortcut">
+              <span class="editor-shortcut-key">Ctrl+W</span> Close tab
+            </div>
+            <div class="editor-shortcut">
+              <span class="editor-shortcut-key">Ctrl+Tab</span> Next tab
+            </div>
+          </div>
+        </div>
+
+        <!-- Migration Workspace Container -->
+        <div id="migration-workspace-container" style="display:none; width:100%; height:100%; position:relative; overflow:hidden; background:var(--color-bg); color:var(--color-text-primary); padding:var(--space-4);">
+          <div class="migration-workspace">
+            
+            <!-- Header -->
+            <div class="migration-header-panel">
+              <div class="migration-title-area">
+                <h2 class="migration-main-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                  </svg>
+                  AI Code Migration Agent
+                </h2>
+                <div class="migration-description">Migrate modules, layers, or entire projects between languages while preserving architecture.</div>
+              </div>
+              <button class="btn btn-ghost" id="btn-migration-back" style="font-size: var(--text-xs); padding: 5px 10px; display: flex; align-items: center; gap: 6px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12">
+                  <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+                </svg>
+                Back to Editor
+              </button>
+            </div>
+
+            <!-- Two Column Dashboard Grid -->
+            <div class="migration-grid">
+              
+              <!-- Left Column: Configuration -->
+              <div class="migration-left-pane">
+                <div class="migration-card migration-config-card">
+                  <div class="migration-card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    Migration Configuration
+                  </div>
+
+                  <!-- 1. Source Language -->
+                  <div class="migration-form-group">
+                    <label class="input-label" for="migration-source-lang">Source Language</label>
+                    <select class="migration-select" id="migration-source-lang">
+                      <option value="auto">Auto Detect</option>
+                      <option value="java">Java</option>
+                      <option value="python">Python</option>
+                      <option value="csharp">C#</option>
+                      <option value="javascript">JavaScript</option>
+                      <option value="typescript">TypeScript</option>
+                      <option value="php">PHP</option>
+                      <option value="go">Go</option>
+                      <option value="rust">Rust</option>
+                      <option value="cpp">C++</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+
+                  <!-- 2. Target Language -->
+                  <div class="migration-form-group">
+                    <label class="input-label" for="migration-target-lang">Target Language</label>
+                    <select class="migration-select" id="migration-target-lang">
+                      <option value="java">Java</option>
+                      <option value="python">Python</option>
+                      <option value="csharp">C#</option>
+                      <option value="javascript">JavaScript</option>
+                      <option value="typescript">TypeScript</option>
+                      <option value="go">Go</option>
+                      <option value="rust">Rust</option>
+                      <option value="cpp">C++</option>
+                      <option value="other">Other</option>
+                      <option value="latest_version">Latest Version of Source Language</option>
+                    </select>
+                  </div>
+
+                  <!-- 3. Migration Scope -->
+                  <div class="migration-form-group">
+                    <label class="input-label">Migration Scope</label>
+                    <div class="migration-radio-grid">
+                      <label class="migration-radio-item selected" id="label-scope-file">
+                        <input type="radio" name="migration-scope" value="file" checked />
+                        <span class="migration-radio-label">Current File</span>
+                      </label>
+                      <label class="migration-radio-item" id="label-scope-folder">
+                        <input type="radio" name="migration-scope" value="folder" />
+                        <span class="migration-radio-label">Selected Folder</span>
+                      </label>
+                      <label class="migration-radio-item" id="label-scope-frontend">
+                        <input type="radio" name="migration-scope" value="frontend" />
+                        <span class="migration-radio-label">Frontend Layer</span>
+                      </label>
+                      <label class="migration-radio-item" id="label-scope-backend">
+                        <input type="radio" name="migration-scope" value="backend" />
+                        <span class="migration-radio-label">Backend Layer</span>
+                      </label>
+                      <label class="migration-radio-item" id="label-scope-database">
+                        <input type="radio" name="migration-scope" value="database" />
+                        <span class="migration-radio-label">Database Layer</span>
+                      </label>
+                      <label class="migration-radio-item" id="label-scope-project">
+                        <input type="radio" name="migration-scope" value="project" />
+                        <span class="migration-radio-label">Entire Project</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- Target Indicator Banner -->
+                  <div class="migration-target-box" id="migration-target-box">
+                    <div class="migration-target-header">
+                      <span class="migration-target-label">Selected Target</span>
+                      <div style="display:flex; gap:6px; align-items:center;">
+                        <span class="badge badge-info" id="migration-mode-badge" style="font-size:11px;">Auto Detect → Java</span>
+                        <span class="migration-target-badge" id="migration-target-badge">Current File</span>
+                      </div>
+                    </div>
+                    <div class="migration-target-path" id="migration-target-path">backend/services/user_service.py</div>
+                    <div class="migration-target-warning" id="migration-target-warning" style="display:none;">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                      </svg>
+                      <span id="migration-target-warning-text">Open a file or select a folder to continue.</span>
+                    </div>
+                  </div>
+
+                  <!-- 4. Migration Strategy -->
+                  <div class="migration-form-group">
+                    <label class="input-label">Migration Strategy</label>
+                    <div class="migration-checkbox-list">
+                      <label class="migration-checkbox-item selected" id="label-strat-arch">
+                        <input type="checkbox" name="migration-strategy" value="preserve-arch" checked />
+                        <span class="migration-checkbox-label">Preserve Architecture</span>
+                      </label>
+                      <label class="migration-checkbox-item selected" id="label-strat-folder">
+                        <input type="checkbox" name="migration-strategy" value="preserve-folder" checked />
+                        <span class="migration-checkbox-label">Preserve Folder Structure</span>
+                      </label>
+                      <label class="migration-checkbox-item selected" id="label-strat-naming">
+                        <input type="checkbox" name="migration-strategy" value="preserve-naming" checked />
+                        <span class="migration-checkbox-label">Preserve Naming Convention</span>
+                      </label>
+                      <label class="migration-checkbox-item selected" id="label-strat-report">
+                        <input type="checkbox" name="migration-strategy" value="gen-report" checked />
+                        <span class="migration-checkbox-label">Generate Migration Report</span>
+                      </label>
+                      <label class="migration-checkbox-item" id="label-strat-validate">
+                        <input type="checkbox" name="migration-strategy" value="validate" />
+                        <span class="migration-checkbox-label">Validate After Migration</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- 5. Action Buttons -->
+                  <div class="migration-button-group">
+                    <button class="btn btn-primary" id="btn-migration-start" style="font-weight: 600;">
+                      Start Migration
+                    </button>
+                    <button class="btn btn-ghost" id="btn-migration-reset">
+                      Reset
+                    </button>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Right Column: Progress, Summary, Report -->
+              <div class="migration-right-pane">
+                
+                <!-- Phase 6: Live Migration Console -->
+                <div class="migration-card" id="migration-live-console" style="display:none; background: var(--color-bg-tertiary); border: 1px solid var(--color-border);">
+                  <div class="migration-card-title" style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>
+                      </svg>
+                      Live Execution Console
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <span class="badge badge-info" id="migration-console-status-badge">RUNNING</span>
+                      <button class="btn btn-ghost" id="migration-console-cancel-btn" style="padding: 2px 8px; font-size: 11px;">Cancel</button>
+                    </div>
+                  </div>
+                  
+                  <div class="console-stream-terminal" id="migration-console-log-stream" style="font-family: var(--font-mono); font-size: 11px; max-height: 180px; overflow-y: auto; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 4px; border: 1px solid var(--color-border-subtle);">
+                    <div class="console-log-line log-info"><span class="console-timestamp">[00:00:00]</span> <span class="console-message">Console initialized. Ready.</span></div>
+                  </div>
+                </div>
+
+                <!-- Migration Progress Panel -->
+                <div class="migration-card">
+                  <div class="migration-card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                    Migration Progress
+                  </div>
+                  
+                  <div class="migration-progress-bar-container">
+                    <div class="migration-progress-bar-fill" id="migration-progress-bar"></div>
+                  </div>
+                  
+                  <div class="migration-steps-list" id="migration-steps-log">
+                    <!-- Steps injected by migration.js -->
+                    <div class="migration-step-row" id="step-row-idle">
+                      <span class="migration-step-dot waiting"></span>
+                      <span class="migration-step-text">Waiting for Migration...</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Migration Summary Panel -->
+                <div class="migration-card">
+                  <div class="migration-card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+                    </svg>
+                    Migration Summary
+                  </div>
+                  
+                  <div class="migration-summary-grid">
+                    <div class="migration-summary-stat-card">
+                      <span class="migration-stat-label">Files Selected</span>
+                      <span class="migration-stat-value accent" id="stat-files-selected">-</span>
+                    </div>
+                    <div class="migration-summary-stat-card">
+                      <span class="migration-stat-label">Files Converted</span>
+                      <span class="migration-stat-value success" id="stat-files-converted">-</span>
+                    </div>
+                    <div class="migration-summary-stat-card">
+                      <span class="migration-stat-label">Warnings</span>
+                      <span class="migration-stat-value warning" id="stat-warnings">-</span>
+                    </div>
+                    <div class="migration-summary-stat-card">
+                      <span class="migration-stat-label">Errors</span>
+                      <span class="migration-stat-value error" id="stat-errors">-</span>
+                    </div>
+                    <div class="migration-summary-stat-card" style="grid-column: span 2;">
+                      <span class="migration-stat-label">Current Status</span>
+                      <span class="migration-stat-value" id="stat-current-status" style="font-size: var(--text-sm);">Idle</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Migration Report Panel -->
+                <div class="migration-card">
+                  <div class="migration-card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    Migration Report
+                  </div>
+                  
+                  <div class="migration-report-viewer" id="migration-report-viewer">No report generated yet. Choose settings and click 'Start Migration'.</div>
+                </div>
+
+              </div>
+
+            </div>
+
+            <!-- ===== Phase 3: AI Migration Agent — Generated Output ===== -->
+            <div class="migration-gen-section" id="migration-gen-section" style="display:none;">
+              <div class="migration-gen-meta-bar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="color:var(--color-cyan-hover);flex-shrink:0;">
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                </svg>
+                <span class="migration-gen-meta" id="migration-gen-meta">AI Migration Agent ready.</span>
+              </div>
+
+              <!-- Download & Staging Output Location Bar -->
+              <div class="migration-card migration-download-bar-card" style="margin-bottom: 12px; padding: 12px 16px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="color:var(--color-accent-hover);">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    <span style="font-weight:600; font-size:var(--text-sm);">Migrated Output Downloads:</span>
+                    <span class="badge badge-info" id="migration-zip-size-badge" style="font-size:11px;">ZIP: -- KB</span>
+                  </div>
+
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <button class="btn btn-ghost" id="btn-download-file" style="padding:4px 10px; font-size:12px;" title="Download selected file as ZIP">
+                      Download File
+                    </button>
+                    <button class="btn btn-ghost" id="btn-download-folder" style="padding:4px 10px; font-size:12px;" title="Download folder as ZIP">
+                      Download Folder
+                    </button>
+                    <button class="btn btn-primary" id="btn-download-project" style="padding:4px 12px; font-size:12px; font-weight:600;" title="Download complete migrated project ZIP">
+                      Download Project ZIP
+                    </button>
+                  </div>
+                </div>
+
+                <div style="margin-top:8px; font-size:11px; color:var(--color-text-muted); display:flex; align-items:center; gap:6px; word-break:break-all;">
+                  <span style="font-weight:600;">Staging Workspace:</span>
+                  <code id="migration-staging-path-display" style="background:var(--color-bg-tertiary); padding:2px 6px; border-radius:3px;">~/.brownfield-ide/migrations/</code>
+                  <span style="color:var(--color-success-hover); font-size:10px;">(Original project files remain untouched)</span>
+                </div>
+              </div>
+
+              <div class="migration-gen-grid">
+
+                <!-- Generated Files Explorer -->
+                <div class="migration-card migration-gen-explorer-card">
+                  <div class="migration-card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    Generated Files
+                  </div>
+                  <div class="migration-gen-filters" id="migration-gen-filters">
+                    <button class="migration-gen-filter active" data-filter="all">All <span class="count">0</span></button>
+                    <button class="migration-gen-filter" data-filter="new">New <span class="count">0</span></button>
+                    <button class="migration-gen-filter" data-filter="modified">Modified <span class="count">0</span></button>
+                    <button class="migration-gen-filter" data-filter="skipped">Skipped <span class="count">0</span></button>
+                    <button class="migration-gen-filter" data-filter="failed">Failed <span class="count">0</span></button>
+                  </div>
+                  <div class="migration-gen-tree" id="migration-gen-tree">
+                    <div class="migration-gen-empty">Waiting for generated files…</div>
+                  </div>
+                </div>
+
+                <!-- Code Comparison (read-only diff) -->
+                <div class="migration-card migration-diff-card">
+                  <div class="migration-card-title migration-diff-head">
+                    <div class="migration-diff-head-left">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M21 3l-7 7"/><path d="M3 3l7 7"/><path d="M16 21h5v-5"/><path d="M8 21H3v-5"/>
+                      </svg>
+                      <span class="migration-diff-title" id="migration-diff-title">Code Comparison</span>
+                    </div>
+                    <div class="migration-diff-toggle">
+                      <button class="btn-diff active" id="btn-diff-split">Split</button>
+                      <button class="btn-diff" id="btn-diff-unified">Unified</button>
+                    </div>
+                  </div>
+                  <div class="migration-diff-body" id="migration-diff-body">
+                    <div class="migration-diff-empty">Select a generated file to compare.</div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- ===== Phase 4: Migration Validation & Approval ===== -->
+            <div class="migration-validation-section" id="migration-validation-section" style="display:none;">
+
+              <!-- Controls + progress -->
+              <div class="migration-card validation-control-card">
+                <div class="migration-card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 12l2 2 4-4"/><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
+                  </svg>
+                  Migration Validation &amp; Approval
+                </div>
+                <div class="validation-controls">
+                  <button class="btn btn-primary" id="btn-run-validation" disabled>Validate Migration</button>
+                  <button class="btn btn-ghost" id="btn-approve-safe">Approve All Safe</button>
+                  <button class="btn btn-ghost" id="btn-reject-migration">Reject Migration</button>
+                  <span class="validation-ready-badge" id="validation-ready-badge"></span>
+                </div>
+                <div class="validation-hint" id="validation-hint">Run migration (Phase 3) first, then validate the generated code.</div>
+                <div class="migration-progress-bar-container">
+                  <div class="migration-progress-bar-fill" id="validation-progress-bar"></div>
+                </div>
+                <div class="migration-steps-list" id="validation-steps-log"></div>
+              </div>
+
+              <!-- Dashboard -->
+              <div class="migration-card validation-dashboard" id="validation-dashboard" style="display:none;">
+                <div class="migration-card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>
+                  </svg>
+                  Validation Dashboard
+                </div>
+                <div class="validation-dashboard-grid">
+                  <div class="validation-ring-wrap">
+                    <svg class="validation-ring" viewBox="0 0 120 120" width="132" height="132">
+                      <circle cx="60" cy="60" r="52" class="validation-ring-track"/>
+                      <circle cx="60" cy="60" r="52" id="validation-score-ring-fill" class="validation-ring-fill" transform="rotate(-90 60 60)"/>
+                    </svg>
+                    <div class="validation-ring-center">
+                      <div class="validation-ring-score" id="validation-score-text">0%</div>
+                      <div class="validation-ring-sub" id="validation-success-text">0% success</div>
+                    </div>
+                  </div>
+                  <div class="validation-stats">
+                    <div class="migration-summary-stat-card"><span class="migration-stat-label">Files Passed</span><span class="migration-stat-value success" id="val-stat-passed">0</span></div>
+                    <div class="migration-summary-stat-card"><span class="migration-stat-label">Warnings</span><span class="migration-stat-value warning" id="val-stat-warnings">0</span></div>
+                    <div class="migration-summary-stat-card"><span class="migration-stat-label">Failed</span><span class="migration-stat-value error" id="val-stat-failed">0</span></div>
+                    <div class="migration-summary-stat-card"><span class="migration-stat-label">Manual Review</span><span class="migration-stat-value accent" id="val-stat-review">0</span></div>
+                    <div class="migration-summary-stat-card" style="grid-column: span 2;"><span class="migration-stat-label">Risk Level</span><span class="migration-stat-value" id="val-stat-risk">—</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Results: file table + issue viewer -->
+              <div class="validation-results-grid" id="validation-results-grid" style="display:none;">
+                <div class="migration-card validation-table-card">
+                  <div class="migration-card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/>
+                    </svg>
+                    File Validation Table
+                  </div>
+                  <div class="migration-gen-filters" id="validation-filters">
+                    <button class="migration-gen-filter active" data-filter="all">All <span class="count">0</span></button>
+                    <button class="migration-gen-filter" data-filter="passed">Passed <span class="count">0</span></button>
+                    <button class="migration-gen-filter" data-filter="warning">Warning <span class="count">0</span></button>
+                    <button class="migration-gen-filter" data-filter="manual_review">Review <span class="count">0</span></button>
+                    <button class="migration-gen-filter" data-filter="failed">Failed <span class="count">0</span></button>
+                  </div>
+                  <div class="validation-table-wrap">
+                    <table class="validation-table">
+                      <thead><tr><th>File</th><th>Status</th><th>Issues</th><th>Risk</th><th>Action</th></tr></thead>
+                      <tbody id="validation-table-body"></tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div class="migration-card validation-issue-card">
+                  <div class="migration-card-title migration-diff-head">
+                    <div class="migration-diff-head-left">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                      </svg>
+                      <span class="migration-diff-title" id="validation-issue-title">Code Issue Viewer</span>
+                    </div>
+                  </div>
+                  <div class="validation-issue-body" id="validation-issue-body">
+                    <div class="migration-diff-empty">Select a file to view issues, dependencies and recommendations.</div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- ===== Phase 5: Migration Application (Apply / Rollback / History) ===== -->
+            <div class="migration-apply-section" id="migration-apply-section" style="display:none;">
+
+              <!-- Controls -->
+              <div class="migration-card apply-control-card">
+                <div class="migration-card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                  Migration Application
+                </div>
+                <div class="apply-controls">
+                  <button class="btn btn-ghost" id="btn-preview-changes">Preview Changes</button>
+                  <button class="btn btn-primary" id="btn-apply-migration" disabled>Apply Migration</button>
+                  <span class="apply-hint" id="apply-hint">Approve files in validation, then apply.</span>
+                </div>
+              </div>
+
+              <!-- Success screen (shown after apply) -->
+              <div class="migration-card apply-success-card" id="apply-success-card" style="display:none;">
+                <div class="apply-success-head">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="22" height="22">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                  </svg>
+                  <span>Migration Applied Successfully</span>
+                </div>
+                <div class="apply-success-stats" id="apply-success-stats"></div>
+                <div class="apply-success-actions">
+                  <button class="btn btn-primary" id="btn-open-project">Open Project</button>
+                  <button class="btn btn-ghost" id="btn-view-report">View Report</button>
+                  <button class="btn btn-ghost" id="btn-rollback-last">Rollback</button>
+                </div>
+                <div class="apply-report-viewer" id="apply-report-viewer" style="display:none;"></div>
+              </div>
+
+              <!-- Changes view + diff preview -->
+              <div class="apply-results-grid" id="apply-results-grid">
+                <div class="migration-card apply-changes-card">
+                  <div class="migration-card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                    </svg>
+                    Migration Changes
+                  </div>
+                  <div class="apply-change-summary" id="apply-change-summary"></div>
+                  <div class="apply-change-list" id="apply-change-list">
+                    <div class="migration-gen-empty">Click “Preview Changes”.</div>
+                  </div>
+                </div>
+
+                <div class="migration-card apply-diff-card">
+                  <div class="migration-card-title migration-diff-head">
+                    <div class="migration-diff-head-left">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M21 3l-7 7"/><path d="M3 3l7 7"/><path d="M16 21h5v-5"/><path d="M8 21H3v-5"/>
+                      </svg>
+                      <span class="migration-diff-title" id="apply-diff-title">Change Preview</span>
+                    </div>
+                  </div>
+                  <div class="apply-diff-body" id="apply-diff-body">
+                    <div class="migration-diff-empty">Select a changed file to preview old → new.</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Migration History -->
+              <div class="migration-card apply-history-card">
+                <div class="migration-card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><polyline points="12 7 12 12 15 15"/>
+                  </svg>
+                  Migration History
+                </div>
+                <div class="apply-history-wrap">
+                  <table class="validation-table apply-history-table">
+                    <thead><tr><th>Migration ID</th><th>Date</th><th>Changed</th><th>Added</th><th>Deleted</th><th>By</th><th>Rollback</th></tr></thead>
+                    <tbody id="apply-history-body"></tbody>
+                  </table>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Dependency graph container -->
+        <div id="dependency-graph-container" style="display:none; width:100%; height:100%; position:relative;">
+          <div id="dependency-graph-canvas" style="width:100%; height:100%; background:#12121e;"></div>
+          <div class="graph-controls-overlay">
+            <button class="btn btn-ghost btn-icon" id="btn-graph-zoom-in" title="Zoom In" style="padding: 4px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+            <button class="btn btn-ghost btn-icon" id="btn-graph-zoom-out" title="Zoom Out" style="padding: 4px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+            <button class="btn btn-ghost btn-icon" id="btn-graph-fit" title="Fit Content" style="padding: 4px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+            </button>
+            <button class="btn btn-ghost" id="btn-graph-close-view" title="Close Graph" style="font-size:10px; padding:2px 6px;">
+              Close Graph
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Terminal resize handle -->
+      <div class="resize-handle resize-handle-v" id="terminal-resize" role="separator" aria-label="Resize terminal"></div>
+
+      <!-- Terminal Panel -->
+      <div class="terminal-panel" id="terminal-panel">
+        <div class="terminal-header">
+          <div class="terminal-tabs" id="terminal-tabs"></div>
+          <div class="terminal-header-actions">
+            <button class="btn-icon btn-ghost" id="btn-terminal-new" title="New Terminal">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="terminal-content" id="terminal-content">
+          <!-- xterm.js panes injected here by terminal.js -->
+          <div class="terminal-empty" id="terminal-empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <polyline points="4 17 10 11 4 5"/>
+              <line x1="12" y1="19" x2="20" y2="19"/>
+            </svg>
+            <span class="terminal-empty-text">Click + to open a terminal</span>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Chat resize handle -->
+    <div class="resize-handle resize-handle-h" id="chat-resize" role="separator" aria-label="Resize chat panel"></div>
+
+    <!-- ── AI Chat Panel ── -->
+    <aside class="ide-chat" id="chat-panel" aria-label="AI Assistant (Phase 5)">
+      <!-- Rendered by chat.js -->
+    </aside>
+
+  </div><!-- /.ide-body -->
+
+  <!-- ── Status Bar ── -->
+  <footer class="ide-statusbar" role="contentinfo" aria-label="Status bar">
+    <span class="statusbar-item" id="sb-project" title="Current project">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+      </svg>
+      No project
+    </span>
+
+    <div class="statusbar-right">
+      <span class="statusbar-item" id="sb-language" title="File language">Plain Text</span>
+      <span class="statusbar-item" id="sb-position" title="Cursor position">Ln 1, Col 1</span>
+      <span class="statusbar-item" id="sb-encoding" title="File encoding">UTF-8</span>
+      <span class="statusbar-item" id="sb-connection" title="Server connection">● Connected</span>
+    </div>
+  </footer>
+
+</div><!-- /#ide-layout -->
+
+<!-- ============================================================
+     GLOBAL OVERLAYS
+============================================================ -->
+
+<!-- Context menu -->
+<div id="context-menu" role="menu" aria-label="Context menu" style="display:none; position:fixed; z-index:200;"></div>
+
+<!-- Diff Viewer (Phase 5) -->
+<div id="diff-viewer-overlay" class="diff-viewer-overlay" style="display:none;">
+  <div class="diff-viewer">
+    <div class="diff-viewer-header">
+      <div class="diff-viewer-title">
+        <span id="diff-viewer-change-type" class="diff-change-badge">modify</span>
+        <span id="diff-viewer-filename">file</span>
+      </div>
+      <div class="diff-viewer-controls">
+        <div class="diff-view-toggle">
+          <button class="diff-toggle-btn active" id="diff-toggle-unified" data-mode="unified">Unified</button>
+          <button class="diff-toggle-btn" id="diff-toggle-split" data-mode="split">Split</button>
+        </div>
+        <button class="btn-icon btn-ghost" id="diff-viewer-close" title="Close (Esc)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="diff-viewer-body" id="diff-viewer-body"></div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container" role="status" aria-live="polite"></div>
+
+<!-- ============================================================
+     SCRIPTS
+============================================================ -->
+
+<!-- xterm.js -->
+<script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xterm-addon-web-links@0.9.0/lib/xterm-addon-web-links.js"></script>
+
+<!-- Monaco loader (AMD) -->
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
+
+<!-- Utilities (order matters) -->
+<script src="js/utils/events.js"></script>
+<script src="js/utils/helpers.js"></script>
+<script src="js/utils/icons.js"></script>
+
+<!-- API client -->
+<script src="js/api.js"></script>
+
+<!-- vis.js Network -->
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+
+<!-- Modules -->
+<script src="js/modules/workspace.js"></script>
+<script src="js/modules/statusbar.js"></script>
+<script src="js/modules/chat.js"></script>
+<script src="js/modules/tabs.js"></script>
+<script src="js/modules/explorer.js"></script>
+<script src="js/modules/editor.js"></script>
+<script src="js/modules/terminal.js"></script>
+<script src="js/modules/welcome.js"></script>
+<script src="js/modules/analysis.js"></script>
+<script src="js/modules/search.js"></script>
+<script src="js/modules/impact.js"></script>
+<script src="js/modules/agent.js"></script>
+<script src="js/modules/validation.js"></script>
+<script src="js/modules/source.js"></script>
+<script src="js/modules/migration.js"></script>
+<script src="js/modules/migration_agent.js"></script>
+<script src="js/modules/migration_validation.js"></script>
+<script src="js/modules/migration_apply.js"></script>
+<script src="js/modules/migration_orchestrator.js"></script>
+
+<!-- Main entry -->
+<script src="js/app.js"></script>
+
+<script>
+  // Wire up the close-all-tabs button after DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('btn-close-all-tabs')?.addEventListener('click', () => {
+      if (typeof TabBar !== 'undefined') TabBar.closeAll();
+    });
+
+    // Monaco container becomes visible once editor is ready
+    EventBus.on('editor:ready', () => {
+      document.getElementById('monaco-container').classList.add('ready');
+    });
+  });
+</script>
+
+</body>
+</html>

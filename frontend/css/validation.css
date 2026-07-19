@@ -1,0 +1,81 @@
+/* ===========================================================================
+   validation.css — Phase 6 Validation & Approval UI
+   =========================================================================== */
+
+.val-card {
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.18);
+  border-radius: var(--radius-md, 6px);
+  padding: var(--space-2, 8px);
+  margin-bottom: var(--space-2, 8px);
+}
+.val-card-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+.val-request { font-size: 12px; font-weight: var(--font-weight-semibold, 600); color: var(--color-text-primary, #e2e8f0); line-height: 1.35; }
+
+.val-status-pill {
+  font-size: 10px; font-weight: bold; padding: 2px 8px; border-radius: 3px; letter-spacing: 0.03em;
+}
+.val-status-pill.pass { background: rgba(16, 185, 129, 0.18); color: #34d399; }
+.val-status-pill.fail { background: rgba(239, 68, 68, 0.2);  color: #f87171; }
+
+/* Stage rows */
+.val-stages { display: flex; flex-direction: column; gap: 3px; }
+.val-stage-row { display: flex; align-items: center; gap: 7px; font-size: 11px; padding: 2px 4px; }
+.val-stage-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.val-stage-dot.pass { background: #10b981; }
+.val-stage-dot.warn { background: #f59e0b; }
+.val-stage-dot.fail { background: #ef4444; }
+.val-stage-dot.skip { background: #64748b; }
+.val-stage-name { flex: 1; color: var(--color-text-secondary, #cbd5e1); }
+.val-stage-status { font-size: 9px; font-weight: bold; letter-spacing: 0.03em; }
+.val-stage-status.pass { color: #34d399; }
+.val-stage-status.warn { color: #fbbf24; }
+.val-stage-status.fail { color: #f87171; }
+.val-stage-status.skip { color: #94a3b8; }
+.val-stage-counts { font-size: 9px; color: var(--color-text-muted, #94a3b8); font-variant-numeric: tabular-nums; }
+
+/* Error / warning lists */
+.val-list { margin: 2px 0 0; padding-left: 16px; font-size: 10px; line-height: 1.5; }
+.val-li.err  { color: #fca5a5; }
+.val-li.warn { color: #fbbf24; }
+
+/* Tests */
+.val-tests {
+  font-size: 11px; padding: 6px 8px; border-radius: 4px;
+  border: 1px solid var(--color-border, #2a2a4a); background: rgba(255,255,255,0.02);
+  color: var(--color-text-secondary, #cbd5e1);
+}
+.val-tests.pass { border-color: rgba(16,185,129,0.35); }
+.val-tests.fail { border-color: rgba(239,68,68,0.4); color: #fca5a5; }
+.val-tests.skip { color: var(--color-text-muted, #94a3b8); }
+.val-tests.warn { border-color: rgba(245,158,11,0.35); }
+
+/* Final diff list */
+.val-diff-list { display: flex; flex-direction: column; gap: 2px; }
+.val-diff-row {
+  display: flex; align-items: center; gap: 6px; font-size: 11px; padding: 4px 6px;
+  border: 1px solid var(--color-border, #2a2a4a); border-radius: 4px;
+  background: rgba(255,255,255,0.02); cursor: pointer; transition: background 0.12s, border-color 0.12s;
+}
+.val-diff-row:hover { background: rgba(59,130,246,0.1); border-color: #3b82f6; }
+.val-diff-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--color-text-primary, #e2e8f0); }
+
+/* Approval */
+.val-approval { display: flex; flex-direction: column; gap: 6px; }
+.val-decision { font-size: 11px; color: var(--color-text-secondary, #cbd5e1); }
+.val-decision.approved strong { color: #34d399; text-transform: capitalize; }
+.val-decision.rejected strong { color: #f87171; text-transform: capitalize; }
+.val-decision.pending strong  { color: #fbbf24; text-transform: capitalize; }
+
+.val-approval-actions { display: flex; gap: 6px; }
+.val-approval-actions .btn { font-size: 11px; padding: 5px 10px; flex: 1; justify-content: center; }
+.btn.val-approve { background: #10b981; color: #06281c; border: none; font-weight: 600; }
+.btn.val-approve:hover:not([disabled]) { background: #34d399; }
+.btn.val-approve[disabled] { opacity: 0.45; cursor: not-allowed; }
+.btn.val-reject { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.4); }
+.btn.val-reject:hover { background: rgba(239,68,68,0.25); }
+.btn.val-regen { font-size: 11px; }
+
+.val-note { font-size: 10px; font-style: italic; line-height: 1.4; color: var(--color-text-muted, #94a3b8); }
+.val-note.ok  { color: #6ee7b7; }
+.val-note.bad { color: #fca5a5; }

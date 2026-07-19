@@ -1,0 +1,59 @@
+/* ===========================================================================
+   source.css — Phase 7 Source Update & Change History UI
+   =========================================================================== */
+
+/* ---- Source Update panel ---- */
+.src-card {
+  background: rgba(124, 58, 237, 0.05);
+  border: 1px solid rgba(124, 58, 237, 0.18);
+  border-radius: var(--radius-md, 6px);
+  padding: var(--space-2, 8px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.src-request { font-size: 12px; font-weight: var(--font-weight-semibold, 600); color: var(--color-text-primary, #e2e8f0); line-height: 1.35; }
+.src-counts { display: flex; flex-wrap: wrap; gap: 8px; font-size: 11px; }
+.src-count.mod { color: #fbbf24; }
+.src-count.add { color: #34d399; }
+.src-count.del { color: #f87171; }
+
+.src-status { font-size: 11px; padding: 6px 8px; border-radius: 4px; line-height: 1.4; }
+.src-status.waiting    { background: rgba(148,163,184,0.1); color: var(--color-text-muted, #94a3b8); }
+.src-status.ready      { background: rgba(16,185,129,0.1);  color: #6ee7b7; }
+.src-status.applying   { background: rgba(59,130,246,0.12); color: #93c5fd; }
+.src-status.success    { background: rgba(16,185,129,0.12); color: #6ee7b7; }
+.src-status.failed     { background: rgba(239,68,68,0.12);  color: #fca5a5; }
+.src-status.rolledback { background: rgba(245,158,11,0.12); color: #fcd34d; }
+
+.src-git { font-size: 11px; color: var(--color-text-secondary, #cbd5e1); display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.src-git code { color: var(--color-text-accent, #c4b5fd); }
+
+.btn.src-apply-btn {
+  width: 100%; justify-content: center; font-size: 12px; font-weight: 600;
+  padding: 8px; background: #7c3aed; color: #fff; border: none; border-radius: 5px;
+}
+.btn.src-apply-btn:hover:not([disabled]) { background: #8b5cf6; }
+.btn.src-apply-btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+.src-note { font-size: 10px; font-style: italic; color: var(--color-text-muted, #94a3b8); line-height: 1.4; }
+
+/* ---- Change History panel ---- */
+.hist-item {
+  border: 1px solid var(--color-border, #2a2a4a);
+  border-radius: 5px;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+  background: rgba(255,255,255,0.02);
+}
+.hist-item.is-undone { opacity: 0.6; }
+.hist-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.hist-request {
+  font-size: 11px; font-weight: var(--font-weight-medium, 500); color: var(--color-text-primary, #e2e8f0);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;
+}
+.hist-badge { font-size: 9px; font-weight: bold; padding: 1px 6px; border-radius: 3px; text-transform: uppercase; }
+.hist-badge.applied { background: rgba(16,185,129,0.18); color: #34d399; }
+.hist-badge.undone  { background: rgba(148,163,184,0.18); color: #94a3b8; }
+.hist-meta { display: flex; justify-content: space-between; font-size: 10px; color: var(--color-text-muted, #94a3b8); margin-top: 3px; }
+.hist-counts { font-variant-numeric: tabular-nums; }
+.btn.hist-rollback { font-size: 10px; padding: 3px 8px; margin-top: 5px; width: 100%; justify-content: center; }
