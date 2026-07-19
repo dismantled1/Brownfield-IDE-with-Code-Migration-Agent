@@ -16,7 +16,11 @@ from backend.models.schemas import WorkspaceState, RecentProject
 logger = logging.getLogger(__name__)
 
 # Where we persist the workspace state
-_STATE_DIR = Path.home() / ".brownfield-ide"
+import platform
+if platform.system() == "Windows":
+    _STATE_DIR = Path.home() / ".brownfield-ide"
+else:
+    _STATE_DIR = Path("/tmp/.brownfield-ide")
 _STATE_FILE = _STATE_DIR / "workspace.json"
 
 # Maximum number of recent projects to remember

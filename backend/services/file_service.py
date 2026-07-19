@@ -41,7 +41,11 @@ HIDDEN_DIRS = {
 MAX_EDITOR_FILE_SIZE = 10 * 1024 * 1024
 
 # Brownfield IDE projects extraction root
-PROJECTS_DIR = Path.home() / "brownfield-projects"
+import platform
+if platform.system() == "Windows":
+    PROJECTS_DIR = Path.home() / "brownfield-projects"
+else:
+    PROJECTS_DIR = Path("/tmp/brownfield-projects")
 
 
 # ---------------------------------------------------------------------------
