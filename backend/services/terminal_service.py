@@ -101,7 +101,7 @@ class TerminalSession:
         self._output_queue.put(None)  # EOF sentinel
 
     def _start_subprocess(self) -> None:
-        """Fallback: start cmd.exe via subprocess with pipes."""
+        """Fallback: start cmd.exe or bash via subprocess with pipes."""
         import subprocess
         try:
             self._proc = subprocess.Popen(
@@ -116,17 +116,43 @@ class TerminalSession:
                 bufsize=1,
             )
         except Exception:
-            self._proc = subprocess.Popen(
-                ["cmd.exe"],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                cwd=self.cwd,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-                bufsize=1,
-            )
+            try:
+                self._proc = subprocess.Popen(
+                    ["cmd.exe"],
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    cwd=self.cwd,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                    bufsize=1,
+                )
+            except Exception:
+                try:
+                    self._proc = subprocess.Popen(
+                        ["/bin/bash"],
+                        stdin=subprocess.PIPE,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.STDOUT,
+                        cwd=self.cwd,
+                        text=True,
+                        encoding="utf-8",
+                        errors="replace",
+                        bufsize=1,
+                    )
+                except Exception:
+                    self._proc = subprocess.Popen(
+                        ["/bin/sh"],
+                        stdin=subprocess.PIPE,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.STDOUT,
+                        cwd=self.cwd,
+                        text=True,
+                        encoding="utf-8",
+                        errors="replace",
+                        bufsize=1,
+                    )
 
         self._reader_thread = threading.Thread(
             target=self._subprocess_reader_loop,
