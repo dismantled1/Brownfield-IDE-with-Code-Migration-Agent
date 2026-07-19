@@ -13,6 +13,9 @@ const WelcomeScreen = (() => {
   function _bindButtons() {
     document.getElementById('btn-open-folder').addEventListener('click', showOpenFolderDialog);
     document.getElementById('btn-open-zip').addEventListener('click', showOpenZipDialog);
+    document.getElementById('btn-open-demo')?.addEventListener('click', () => {
+      _openProject('.');
+    });
   }
 
   async function _loadRecents() {
