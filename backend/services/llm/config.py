@@ -18,7 +18,11 @@ from typing import Dict, Any, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
-_SETTINGS_DIR = Path.home() / ".brownfield-ide"
+import platform
+if platform.system() == "Windows":
+    _SETTINGS_DIR = Path.home() / ".brownfield-ide"
+else:
+    _SETTINGS_DIR = Path("/tmp/.brownfield-ide")
 _SETTINGS_FILE = _SETTINGS_DIR / "settings.json"
 
 DEFAULT_SETTINGS: Dict[str, Any] = {

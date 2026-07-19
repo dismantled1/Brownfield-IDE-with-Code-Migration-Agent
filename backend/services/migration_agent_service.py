@@ -48,7 +48,11 @@ logger = logging.getLogger(__name__)
 
 # Where generated code is staged. This is OUTSIDE the user's project so the
 # original project is guaranteed to remain untouched.
-_STAGING_ROOT = Path.home() / ".brownfield-ide" / "migrations"
+import platform
+if platform.system() == "Windows":
+    _STAGING_ROOT = Path.home() / ".brownfield-ide" / "migrations"
+else:
+    _STAGING_ROOT = Path("/tmp/.brownfield-ide/migrations")
 
 # Keep prompts bounded so we don't blow past provider context windows.
 MAX_SOURCE_CHARS = 12000

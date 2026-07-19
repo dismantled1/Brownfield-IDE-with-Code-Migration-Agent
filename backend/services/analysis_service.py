@@ -287,7 +287,12 @@ class AnalysisManager:
     def _get_cache_path(self, project_root: str) -> Path:
         resolved = str(Path(project_root).resolve())
         path_hash = hashlib.md5(resolved.encode('utf-8')).hexdigest()
-        return Path.home() / ".brownfield-ide" / "analysis" / f"{path_hash}.json"
+        import platform
+        if platform.system() == "Windows":
+            base_dir = Path.home() / ".brownfield-ide"
+        else:
+            base_dir = Path("/tmp/.brownfield-ide")
+        return base_dir / "analysis" / f"{path_hash}.json"
 
     def _load_cache(self, cache_path: Path) -> Optional[Dict[str, Any]]:
         try:

@@ -42,7 +42,11 @@ from backend.services.migration_validation_service import migration_validation_s
 
 logger = logging.getLogger(__name__)
 
-_BASE = Path.home() / ".brownfield-ide"
+import platform
+if platform.system() == "Windows":
+    _BASE = Path.home() / ".brownfield-ide"
+else:
+    _BASE = Path("/tmp/.brownfield-ide")
 _BACKUP_ROOT = _BASE / "backups"
 _HISTORY_FILE = _BASE / "migration_history.json"
 

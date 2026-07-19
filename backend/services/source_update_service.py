@@ -30,7 +30,11 @@ from backend.services.validation_service import validation_service
 
 logger = logging.getLogger(__name__)
 
-_STATE_ROOT = Path.home() / ".brownfield-ide"
+import platform
+if platform.system() == "Windows":
+    _STATE_ROOT = Path.home() / ".brownfield-ide"
+else:
+    _STATE_ROOT = Path("/tmp/.brownfield-ide")
 _HISTORY_DIR = _STATE_ROOT / "history"
 _BACKUP_ROOT = _STATE_ROOT / "backups"
 MAX_HISTORY = 100
